@@ -2,6 +2,7 @@ package com.observaacao.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ public class Solicitacao {
     private final String protocolo;
     private Categoria categoria;
     private String descricao;
+    private String bairro;
     private String localizacao;
     private Prioridade prioridade;
     private StatusSolicitacao status;
@@ -23,10 +25,12 @@ public class Solicitacao {
     private final List<Comentario> comentarios;
 
     public Solicitacao(String protocolo, Categoria categoria, String descricao,
-                       String localizacao, Prioridade prioridade, Usuario solicitante) {
+                       String bairro, String localizacao, Prioridade prioridade,
+                       Usuario solicitante) {
         this.protocolo = protocolo;
         this.categoria = categoria;
         this.descricao = descricao;
+        this.bairro = bairro;
         this.localizacao = localizacao;
         this.prioridade = prioridade;
         this.solicitante = solicitante;
@@ -84,11 +88,43 @@ public class Solicitacao {
         };
     }
 
+    // --- Verificação de atraso ---
+
+    public boolean isAtrasada() {
+        if (status.isTerminal()) return false;
+        return LocalDateTime.now().isAfter(prazoEstimado);
+    }
+
+    public long getDiasAtraso() {
+        if (!isAtrasada()) return 0;
+        return ChronoUnit.DAYS.between(prazoEstimado, LocalDateTime.now());
+    }
+
+    public long getDiasRestantes() {
+        if (status.isTerminal()) return 0;
+        long dias = ChronoUnit.DAYS.between(LocalDateTime.now(), prazoEstimado);
+        return Math.max(dias, 0);
+    }
+
+    public String getJustificativaAtraso() {
+        if (!isAtrasada()) return "Dentro do prazo";
+        List<HistoricoStatus> historico = getHistoricoStatus();
+        for (int i = historico.size() - 1; i >= 0; i--) {
+            String obs = historico.get(i).getObservacao();
+            if (obs != null && !obs.isEmpty()) {
+                return obs + " (por " + historico.get(i).getResponsavel()
+                        + " em " + historico.get(i).getDataAlteracao().format(FORMATTER) + ")";
+            }
+        }
+        return "Sem justificativa registrada pelo órgão responsável";
+    }
+
     // --- Getters ---
 
     public String getProtocolo()            { return protocolo; }
     public Categoria getCategoria()         { return categoria; }
     public String getDescricao()            { return descricao; }
+    public String getBairro()               { return bairro; }
     public String getLocalizacao()          { return localizacao; }
     public Prioridade getPrioridade()       { return prioridade; }
     public StatusSolicitacao getStatus()    { return status; }
@@ -101,6 +137,7 @@ public class Solicitacao {
 
     public void setCategoria(Categoria categoria)       { this.categoria = categoria; }
     public void setDescricao(String descricao)          { this.descricao = descricao; }
+    public void setBairro(String bairro)                { this.bairro = bairro; }
     public void setLocalizacao(String localizacao)      { this.localizacao = localizacao; }
     public void setAnexo(Anexo anexo)                   { this.anexo = anexo; }
 
@@ -129,11 +166,18 @@ public class Solicitacao {
         sb.append(String.format("  Protocolo:    %s%n", protocolo));
         sb.append(String.format("  Categoria:    %s%n", categoria.getDescricao()));
         sb.append(String.format("  Descrição:    %s%n", descricao));
+        sb.append(String.format("  Bairro:       %s%n", bairro));
         sb.append(String.format("  Localização:  %s%n", localizacao));
         sb.append(String.format("  Prioridade:   %s%n", prioridade.getDescricao()));
         sb.append(String.format("  Status:       %s%n", status.getDescricao()));
         sb.append(String.format("  Criado em:    %s%n", dataCriacao.format(FORMATTER)));
         sb.append(String.format("  Prazo:        %s%n", prazoEstimado.format(FORMATTER)));
+        if (isAtrasada()) {
+            sb.append(String.format("  ⚠ ATRASADA:   %d dia(s) de atraso%n", getDiasAtraso()));
+            sb.append(String.format("  Justificativa: %s%n", getJustificativaAtraso()));
+        } else if (!status.isTerminal()) {
+            sb.append(String.format("  Dias restantes: %d dia(s)%n", getDiasRestantes()));
+        }
         sb.append(String.format("  Solicitante:  %s%n", solicitante.isAnonimo() ? "ANÔNIMO" : solicitante.getNome()));
         if (anexo != null) {
             sb.append(String.format("  Anexo:        %s%n", anexo.getNomeArquivo()));

@@ -27,7 +27,7 @@ public class Main {
 
             switch (opcao) {
                 case "1" -> cadastroView.exibirFormulario();
-                case "2" -> consultaView.exibirConsulta();
+                case "2" -> consultaView.exibirMenuAcompanhamento();
                 case "3" -> consultaView.exibirListagem();
                 case "4" -> gestaoView.exibirMenuGestao();
                 case "0" -> {
@@ -45,9 +45,10 @@ public class Main {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
         System.out.println("║              OBSERVAAÇÃO - Menu                 ║");
         System.out.println("║    Sistema de Solicitações ao Cidadão           ║");
+        System.out.println("║              ODS 16 — Paz e Justiça             ║");
         System.out.println("╠══════════════════════════════════════════════════╣");
         System.out.println("║  [1] Nova Solicitação                           ║");
-        System.out.println("║  [2] Consultar Solicitação (por protocolo)      ║");
+        System.out.println("║  [2] Acompanhar Solicitação (cidadão)           ║");
         System.out.println("║  [3] Listar Todas as Solicitações               ║");
         System.out.println("║  [4] Painel do Servidor / Gestor                ║");
         System.out.println("║  [0] Sair                                       ║");

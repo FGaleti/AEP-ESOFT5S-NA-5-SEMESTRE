@@ -1,5 +1,15 @@
 # PERSONAS — Projeto ObservaAção
 ## IHC — Interação Humano-Computador
+### Alinhamento: ODS 16 — Paz, Justiça e Instituições Eficazes
+
+> **ODS 16 – Meta 16.6:** Desenvolver instituições eficazes, responsáveis e transparentes em todos os níveis.
+> **ODS 16 – Meta 16.7:** Garantir a tomada de decisão responsiva, inclusiva, participativa e representativa em todos os níveis.
+>
+> O sistema **ObservaAção** é uma ouvidoria digital que materializa os princípios da ODS 16 ao:
+> - Dar voz ao cidadão comum, inclusive em situação de vulnerabilidade (Meta 16.7)
+> - Garantir transparência e rastreabilidade das demandas públicas (Meta 16.6)
+> - Proteger denunciantes anônimos contra retaliação (Meta 16.10)
+> - Fornecer métricas de desempenho para auditoria e prestação de contas (Meta 16.6)
 
 ---
 
@@ -260,3 +270,16 @@
 | Servidor / Gestor | Carlos, 34 | Organização, filtros, atualização rápida |
 | Servidor / Gestor | Fernanda, 41 | Visão gerencial, delegação, relatórios |
 | Servidor / Gestor | Ricardo, 55 | Auditoria, sigilo, métricas, LGPD |
+
+---
+
+## Mapeamento Persona → Funcionalidade Implementada
+
+| Persona | Funcionalidade no Sistema | ODS 16 |
+|---------|---------------------------|--------|
+| Dona Marlene, Seu Antônio, Cláudia | Cadastro de solicitação com fluxo linear (passo a passo) | Meta 16.7 — participação inclusiva |
+| Rafael, Maria das Graças | Modo anônimo sem rastreio (sem CPF, sem login) | Meta 16.10 — proteção de denunciantes |
+| Joana | Busca por protocolo + visualização de prazo e justificativa de atraso | Meta 16.6 — transparência |
+| Carlos | Painel do atendente: filtros por prioridade, bairro, categoria | Meta 16.6 — instituições eficazes |
+| Fernanda | Dashboard com resumo: abertas, em execução, atrasadas | Meta 16.6 — prestação de contas |
+| Ricardo | Histórico imutável + comentário obrigatório na mudança de status | Meta 16.6 — rastreabilidade e auditoria |

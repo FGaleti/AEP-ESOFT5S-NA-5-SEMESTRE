@@ -63,6 +63,38 @@ public class FilaAtendimento {
     public List<Solicitacao> listarPorCategoria(Categoria categoria) {
         return todas.stream()
                 .filter(s -> s.getCategoria() == categoria)
+                .sorted(COMPARADOR_FILA)
+                .collect(Collectors.toList());
+    }
+
+    public List<Solicitacao> listarPorBairro(String bairro) {
+        return todas.stream()
+                .filter(s -> s.getBairro() != null
+                        && s.getBairro().equalsIgnoreCase(bairro))
+                .sorted(COMPARADOR_FILA)
+                .collect(Collectors.toList());
+    }
+
+    public List<Solicitacao> listarPorPrioridade(Prioridade prioridade) {
+        return todas.stream()
+                .filter(s -> s.getPrioridade() == prioridade)
+                .sorted(COMPARADOR_FILA)
+                .collect(Collectors.toList());
+    }
+
+    public List<Solicitacao> listarAtrasadas() {
+        return todas.stream()
+                .filter(Solicitacao::isAtrasada)
+                .sorted(COMPARADOR_FILA)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> listarBairrosDistintos() {
+        return todas.stream()
+                .map(Solicitacao::getBairro)
+                .filter(b -> b != null && !b.isEmpty())
+                .distinct()
+                .sorted()
                 .collect(Collectors.toList());
     }
 

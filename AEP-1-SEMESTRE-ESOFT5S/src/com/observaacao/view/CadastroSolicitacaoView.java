@@ -28,25 +28,28 @@ public class CadastroSolicitacaoView {
         // 3. Descrição
         String descricao = coletarDescricao();
 
-        // 4. Localização
+        // 4. Bairro
+        String bairro = coletarBairro();
+
+        // 5. Localização (endereço / referência)
         String localizacao = coletarLocalizacao();
 
-        // 5. Prioridade
+        // 6. Prioridade
         Prioridade prioridade = coletarPrioridade();
 
-        // 6. Anexo (opcional)
+        // 7. Anexo (opcional)
         Anexo anexo = coletarAnexo();
 
-        // 7. Confirmação
-        if (!confirmarCadastro(categoria, descricao, localizacao, prioridade, solicitante, anexo)) {
+        // 8. Confirmação
+        if (!confirmarCadastro(categoria, descricao, bairro, localizacao, prioridade, solicitante, anexo)) {
             System.out.println("\n⚠ Cadastro cancelado pelo usuário.");
             return;
         }
 
-        // 8. Cadastrar
+        // 9. Cadastrar
         try {
-            Solicitacao solicitacao = service.cadastrar(categoria, descricao, localizacao,
-                    prioridade, solicitante, anexo);
+            Solicitacao solicitacao = service.cadastrar(categoria, descricao, bairro,
+                    localizacao, prioridade, solicitante, anexo);
 
             System.out.println("\n✔ Solicitação registrada com sucesso!\n");
             System.out.println(solicitacao);
@@ -116,9 +119,23 @@ public class CadastroSolicitacaoView {
         return descricao;
     }
 
+    private String coletarBairro() {
+        System.out.println("─── Bairro ───");
+        System.out.print("Nome do bairro: ");
+        String bairro;
+        do {
+            bairro = scanner.nextLine().trim();
+            if (bairro.isEmpty()) {
+                System.out.print("Bairro é obrigatório. Tente novamente: ");
+            }
+        } while (bairro.isEmpty());
+        System.out.println();
+        return bairro;
+    }
+
     private String coletarLocalizacao() {
         System.out.println("─── Localização ───");
-        System.out.print("Bairro / Endereço / Referência: ");
+        System.out.print("Endereço / Referência: ");
         String localizacao;
         do {
             localizacao = scanner.nextLine().trim();
@@ -169,8 +186,9 @@ public class CadastroSolicitacaoView {
         return null;
     }
 
-    private boolean confirmarCadastro(Categoria categoria, String descricao, String localizacao,
-                                       Prioridade prioridade, Usuario solicitante, Anexo anexo) {
+    private boolean confirmarCadastro(Categoria categoria, String descricao, String bairro,
+                                       String localizacao, Prioridade prioridade,
+                                       Usuario solicitante, Anexo anexo) {
         System.out.println("═══════════════════════════════════════════════════");
         System.out.println("           CONFIRME OS DADOS DA SOLICITAÇÃO       ");
         System.out.println("═══════════════════════════════════════════════════");
@@ -180,6 +198,7 @@ public class CadastroSolicitacaoView {
         }
         System.out.printf("  Categoria:    %s%n", categoria.getDescricao());
         System.out.printf("  Descrição:    %s%n", descricao);
+        System.out.printf("  Bairro:       %s%n", bairro);
         System.out.printf("  Localização:  %s%n", localizacao);
         System.out.printf("  Prioridade:   %s%n", prioridade.getDescricao());
         System.out.printf("  Anexo:        %s%n", anexo != null ? anexo.getNomeArquivo() : "Nenhum");

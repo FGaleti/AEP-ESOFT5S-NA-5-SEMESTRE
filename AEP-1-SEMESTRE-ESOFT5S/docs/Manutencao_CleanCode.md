@@ -83,3 +83,17 @@ As práticas aplicadas convergem em 3 pilares da manutenibilidade:
 | **Confiabilidade** | Fail fast, imutabilidade, auditoria atômica | Impossível transição sem registro, impossível modificação externa |
 
 Essas práticas são essenciais em um sistema voltado ao cidadão (ODS 16), onde rastreabilidade e evolução contínua são requisitos, não luxos.
+
+---
+
+## Adendo — Clean Code nas funcionalidades de acompanhamento
+
+As novas funcionalidades implementadas (acompanhamento pelo cidadão e painel do gestor) seguem as mesmas práticas:
+
+| Método/Classe | Prática aplicada | Onde |
+|---------------|------------------|------|
+| `Solicitacao.isAtrasada()` | Encapsulamento de regra de negócio — a lógica de "atrasada" não depende de cálculo externo | `Solicitacao.java` |
+| `Solicitacao.getJustificativaAtraso()` | Tell, Don't Ask — a solicitação sabe buscar a justificativa no próprio histórico | `Solicitacao.java` |
+| `SolicitacaoService.avancarStatus()` | Fail Fast — valida observação obrigatória antes de qualquer transição | `SolicitacaoService.java` |
+| `FilaAtendimento.listarPorBairro()` | DRY + Streams — filtros reutilizam o `COMPARADOR_FILA` centralizado | `FilaAtendimento.java` |
+| `GestaoSolicitacaoView.avancarStatus()` | Loop de validação obrigatória — garante que o gestor nunca avança status sem justificativa | `GestaoSolicitacaoView.java` |
