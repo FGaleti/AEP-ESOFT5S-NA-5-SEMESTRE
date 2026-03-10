@@ -25,8 +25,8 @@ public class CadastroSolicitacaoView {
         // 2. Categoria
         Categoria categoria = coletarCategoria();
 
-        // 3. Descrição
-        String descricao = coletarDescricao();
+        // 3. Descrição (mínimo maior para anônimos — compensar ausência de dados)
+        String descricao = coletarDescricao(solicitante.isAnonimo());
 
         // 4. Bairro
         String bairro = coletarBairro();
@@ -34,7 +34,7 @@ public class CadastroSolicitacaoView {
         // 5. Localização (endereço / referência)
         String localizacao = coletarLocalizacao();
 
-        // 6. Prioridade
+        // 6. Prioridade (com SLA e impacto social visíveis)
         Prioridade prioridade = coletarPrioridade();
 
         // 7. Anexo (opcional)
@@ -55,24 +55,37 @@ public class CadastroSolicitacaoView {
             System.out.println(solicitacao);
 
             if (solicitante.isAnonimo()) {
-                System.out.println("\n⚠ IMPORTANTE: Anote seu protocolo! Como solicitação anônima,");
-                System.out.println("  este é o único meio de acompanhar o andamento.");
-                System.out.println("  Protocolo: " + solicitacao.getProtocolo());
+                System.out.println("\n╔══════════════════════════════════════════════════╗");
+                System.out.println("║  ⚠ IMPORTANTE — SOLICITAÇÃO ANÔNIMA             ║");
+                System.out.println("║  Anote seu protocolo! Este é o ÚNICO meio de     ║");
+                System.out.println("║  acompanhar o andamento da sua solicitação.      ║");
+                System.out.println("║  Seus dados pessoais NÃO foram registrados.      ║");
+                System.out.printf("║  Protocolo: %-37s║%n", solicitacao.getProtocolo());
+                System.out.println("╚══════════════════════════════════════════════════╝");
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("\n✘ Erro ao cadastrar: " + e.getMessage());
         }
     }
 
     private Usuario coletarIdentificacao() {
         System.out.println("─── Identificação ───");
-        System.out.println("[1] Me identificar");
-        System.out.println("[2] Registrar anonimamente");
+        System.out.println("[1] Me identificar (nome e e-mail serão registrados)");
+        System.out.println("[2] Registrar ANONIMAMENTE (nenhum dado pessoal será coletado)");
         System.out.print("Opção: ");
         int opcao = lerOpcaoInteira(1, 2);
 
         if (opcao == 2) {
-            System.out.println("→ Modo anônimo selecionado. Seus dados não serão registrados.\n");
+            System.out.println();
+            System.out.println("  ╔══════════════════════════════════════════════════╗");
+            System.out.println("  ║  MODO ANÔNIMO ATIVADO                           ║");
+            System.out.println("  ║  → Nenhum dado pessoal será coletado ou salvo.   ║");
+            System.out.println("  ║  → Sua identidade NÃO poderá ser descoberta.     ║");
+            System.out.println("  ║  → A descrição precisará ser mais detalhada      ║");
+            System.out.println("  ║    (mínimo 20 caracteres) para viabilizar         ║");
+            System.out.println("  ║    o atendimento sem contato.                    ║");
+            System.out.println("  ╚══════════════════════════════════════════════════╝");
+            System.out.println();
             return Usuario.criarAnonimo();
         }
 
@@ -104,17 +117,25 @@ public class CadastroSolicitacaoView {
         return categorias[opcao - 1];
     }
 
-    private String coletarDescricao() {
+    private String coletarDescricao(boolean isAnonimo) {
+        int minimoChars = isAnonimo ? 20 : 10;
         System.out.println("─── Descrição ───");
-        System.out.println("Descreva o problema com detalhes (mínimo 10 caracteres):");
+        if (isAnonimo) {
+            System.out.println("⚠ Modo anônimo: descreva com mais detalhes (mínimo " + minimoChars + " caracteres).");
+            System.out.println("  Inclua referências visuais, datas e detalhes que ajudem");
+            System.out.println("  a equipe a entender o problema sem contato com você.");
+        } else {
+            System.out.println("Descreva o problema com detalhes (mínimo " + minimoChars + " caracteres):");
+        }
         System.out.print("> ");
         String descricao;
         do {
             descricao = scanner.nextLine().trim();
-            if (descricao.length() < 10) {
-                System.out.print("Descrição muito curta. Tente novamente:\n> ");
+            if (descricao.length() < minimoChars) {
+                System.out.printf("Descrição muito curta (%d/%d). Tente novamente:%n> ",
+                        descricao.length(), minimoChars);
             }
-        } while (descricao.length() < 10);
+        } while (descricao.length() < minimoChars);
         System.out.println();
         return descricao;
     }
@@ -148,16 +169,11 @@ public class CadastroSolicitacaoView {
     }
 
     private Prioridade coletarPrioridade() {
-        System.out.println("─── Prioridade ───");
+        System.out.println("─── Prioridade (SLA — Acordo de Nível de Serviço) ───");
         Prioridade[] prioridades = Prioridade.values();
         for (int i = 0; i < prioridades.length; i++) {
-            String prazo = switch (prioridades[i]) {
-                case BAIXA -> "(prazo: 30 dias)";
-                case MEDIA -> "(prazo: 15 dias)";
-                case ALTA -> "(prazo: 5 dias)";
-                case CRITICA -> "(prazo: 2 dias)";
-            };
-            System.out.printf("[%d] %s %s%n", i + 1, prioridades[i].getDescricao(), prazo);
+            System.out.printf("[%d] %s%n", i + 1, prioridades[i].getSlaFormatado());
+            System.out.printf("    Ex.: %s%n", prioridades[i].getExemploContexto());
         }
         System.out.print("Opção: ");
         int opcao = lerOpcaoInteira(1, prioridades.length);
@@ -192,7 +208,7 @@ public class CadastroSolicitacaoView {
         System.out.println("═══════════════════════════════════════════════════");
         System.out.println("           CONFIRME OS DADOS DA SOLICITAÇÃO       ");
         System.out.println("═══════════════════════════════════════════════════");
-        System.out.printf("  Tipo:         %s%n", solicitante.isAnonimo() ? "ANÔNIMA" : "IDENTIFICADA");
+        System.out.printf("  Tipo:         %s%n", solicitante.isAnonimo() ? "ANÔNIMA (dados protegidos)" : "IDENTIFICADA");
         if (!solicitante.isAnonimo()) {
             System.out.printf("  Solicitante:  %s%n", solicitante.getNome());
         }
@@ -200,7 +216,8 @@ public class CadastroSolicitacaoView {
         System.out.printf("  Descrição:    %s%n", descricao);
         System.out.printf("  Bairro:       %s%n", bairro);
         System.out.printf("  Localização:  %s%n", localizacao);
-        System.out.printf("  Prioridade:   %s%n", prioridade.getDescricao());
+        System.out.printf("  Prioridade:   %s (SLA: %d dias)%n", prioridade.getDescricao(), prioridade.getPrazoEmDias());
+        System.out.printf("  Impacto:      %s%n", prioridade.getImpactoSocial());
         System.out.printf("  Anexo:        %s%n", anexo != null ? anexo.getNomeArquivo() : "Nenhum");
         System.out.println("═══════════════════════════════════════════════════");
         System.out.print("Confirmar envio? [S/N]: ");

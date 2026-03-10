@@ -1,6 +1,7 @@
 package com.observaacao.view;
 
 import com.observaacao.model.Categoria;
+import com.observaacao.model.LogAuditoria;
 import com.observaacao.model.Prioridade;
 import com.observaacao.model.Solicitacao;
 import com.observaacao.model.StatusSolicitacao;
@@ -43,6 +44,9 @@ public class GestaoSolicitacaoView {
             System.out.println("║  [7] Listar por BAIRRO                                  ║");
             System.out.println("║  [8] Listar por CATEGORIA                               ║");
             System.out.println("║  [9] Listar ATRASADAS                                   ║");
+            System.out.println("║  ──── Auditoria / Prevenção de Abuso ─────────────────── ║");
+            System.out.println("║  [10] Ver LOG DE AUDITORIA                              ║");
+            System.out.println("║  [11] Ver TABELA DE SLA (prazos por prioridade)         ║");
             System.out.println("║  [0] Voltar ao menu principal                           ║");
             System.out.println("╚══════════════════════════════════════════════════════════╝");
             System.out.print("Opção: ");
@@ -59,6 +63,8 @@ public class GestaoSolicitacaoView {
                 case "7" -> filtrarPorBairro();
                 case "8" -> filtrarPorCategoria();
                 case "9" -> verAtrasadas();
+                case "10" -> verLogAuditoria();
+                case "11" -> verTabelaSLA();
                 case "0" -> continuar = false;
                 default -> System.out.println("\nOpção inválida.");
             }
@@ -74,6 +80,7 @@ public class GestaoSolicitacaoView {
         long resolvidas = service.contarPorStatus(StatusSolicitacao.RESOLVIDO);
         long encerradas = service.contarPorStatus(StatusSolicitacao.ENCERRADO);
         long atrasadas = service.contarAtrasadas();
+        long tentativasAbuso = service.contarTentativasAbuso();
         long total = service.listarTodas().size();
 
         System.out.println("\n┌──────────────────────────────────────────────────────────┐");
@@ -83,6 +90,9 @@ public class GestaoSolicitacaoView {
         System.out.printf("│  Em Execução: %-4d │ Resolvidas: %-4d │ Encerradas: %-4d │%n", execucao, resolvidas, encerradas);
         if (atrasadas > 0) {
             System.out.printf("│  ⚠ ATRASADAS: %-4d                                       │%n", atrasadas);
+        }
+        if (tentativasAbuso > 0) {
+            System.out.printf("│  ⛔ Tentativas de abuso bloqueadas: %-4d                   │%n", tentativasAbuso);
         }
         System.out.println("└──────────────────────────────────────────────────────────┘\n");
     }
@@ -299,14 +309,71 @@ public class GestaoSolicitacaoView {
         System.out.println("  " + "─".repeat(90));
 
         for (Solicitacao s : atrasadas) {
-            System.out.printf("  %-20s %-10s %-15s %-14s %-12s %d dia(s)%n",
+            System.out.printf("  %-20s %-10s %-15s %-14s %-12s %d dia(s) (SLA: %d dias)%n",
                     s.getProtocolo(),
                     s.getPrioridade().getDescricao(),
                     s.getCategoria().getDescricao(),
                     s.getStatus().getDescricao(),
                     s.getBairro(),
-                    s.getDiasAtraso());
+                    s.getDiasAtraso(),
+                    s.getPrioridade().getPrazoEmDias());
         }
+    }
+
+    // ─── Log de Auditoria (ODS 16 — transparência e rastreabilidade) ───
+
+    private void verLogAuditoria() {
+        System.out.println("\n╔══════════════════════════════════════════════════════════╗");
+        System.out.println("║          LOG DE AUDITORIA DO SISTEMA                     ║");
+        System.out.println("║    Rastreabilidade — ODS 16 (Meta 16.6)                  ║");
+        System.out.println("╚══════════════════════════════════════════════════════════╝");
+
+        System.out.println("\n[1] Ver todos os logs");
+        System.out.println("[2] Filtrar por protocolo");
+        System.out.println("[3] Ver apenas tentativas de abuso");
+        System.out.println("[0] Voltar");
+        System.out.print("Opção: ");
+        String opcao = scanner.nextLine().trim();
+
+        List<LogAuditoria> logs;
+        switch (opcao) {
+            case "1" -> logs = service.getLogsAuditoria();
+            case "2" -> {
+                System.out.print("Protocolo: ");
+                String proto = scanner.nextLine().trim();
+                logs = service.getLogsPorProtocolo(proto);
+            }
+            case "3" -> logs = service.getLogsPorTipo(LogAuditoria.TipoEvento.TENTATIVA_ABUSO);
+            default -> { return; }
+        }
+
+        if (logs.isEmpty()) {
+            System.out.println("\n  Nenhum registro encontrado.");
+            return;
+        }
+
+        System.out.printf("%n  Total de registros: %d%n%n", logs.size());
+        for (LogAuditoria log : logs) {
+            System.out.println("  " + log);
+        }
+    }
+
+    // ─── Tabela de SLA (prazos e impacto social) ───
+
+    private void verTabelaSLA() {
+        System.out.println("\n╔═════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║   TABELA DE SLA — Acordo de Nível de Serviço (ODS 16)              ║");
+        System.out.println("╠═════════════════════════════════════════════════════════════════════════╣");
+        System.out.printf("  %-10s %-8s %-50s%n", "PRIORIDADE", "PRAZO", "IMPACTO SOCIAL");
+        System.out.println("  " + "─".repeat(70));
+        for (Prioridade p : Prioridade.values()) {
+            System.out.printf("  %-10s %-8s %-50s%n",
+                    p.getDescricao(),
+                    p.getPrazoEmDias() + " dias",
+                    p.getImpactoSocial());
+            System.out.printf("  %10s Ex.: %s%n", "", p.getExemploContexto());
+        }
+        System.out.println("╚═════════════════════════════════════════════════════════════════════════╝");
     }
 
     // ─── Tabela padrão de solicitações ───

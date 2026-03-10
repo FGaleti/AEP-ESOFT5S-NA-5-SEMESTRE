@@ -3,72 +3,72 @@
 
 ---
 
-## 1. Enum `StatusSolicitacao` — Máquina de Estados no Enum
+## 1. Enum `Prioridade` — SLA e Impacto Social no Próprio Tipo
 
-**Localização:** `src/com/observaacao/model/StatusSolicitacao.java`
+**Localização:** `src/com/observaacao/model/Prioridade.java`
 
 ### Práticas de Clean Code aplicadas:
 
-**a) Encapsulamento da regra de transição no próprio tipo (Tell, Don't Ask)**
-- **O que foi feito:** Cada constante do enum implementa o método abstrato `proximosPermitidos()`, declarando quais transições são válidas a partir de si mesma. O método `podeTransicionarPara(destino)` encapsula a consulta.
-- **Como aplicou:** Antes, a lógica de transição estava espalhada no `SolicitacaoService` com `if/else`. Agora, `ABERTO.podeTransicionarPara(TRIAGEM)` retorna `true` por definição do próprio enum — sem lógica externa.
-- **Por que melhora manutenção:** Se um novo status surgir (ex.: `AGUARDANDO_MATERIAL`), basta adicioná-lo ao enum com seus `proximosPermitidos()`. Nenhuma outra classe precisa ser alterada. A regra de negócio vive junto ao dado, eliminando o risco de dessincronia.
+**a) Eliminação de dados hardcoded (Magic Numbers)**
+- **O que foi feito:** Antes, os prazos de SLA eram definidos em um `switch` dentro de `Solicitacao.calcularPrazo()` com valores soltos (`2`, `5`, `15`, `30`). Agora, cada constante do enum carrega `prazoEmDias`, `impactoSocial` e `exemploContexto` como campos finais.
+- **Como aplicou:** `CRITICA("Crítica", 2, "Risco iminente à vida...", "Desabamento...")` — o prazo vive junto ao dado, não espalhado em lógica externa. O método `calcularPrazo()` em `Solicitacao` ficou uma linha: `dataCriacao.plusDays(prioridade.getPrazoEmDias())`.
+- **Por que melhora manutenção:** Se o gestor decidir alterar o SLA de "Alta" de 5 para 7 dias, há **um único ponto de alteração** (o enum). Zero risco de esquecer de atualizar a View ou o Service.
 
-**b) Self-documenting code (código autodocumentado)**
-- **O que foi feito:** O fluxo `ABERTO → TRIAGEM → EM_EXECUCAO → RESOLVIDO → ENCERRADO` fica legível diretamente no enum, sem necessidade de diagrama externo.
-- **Como aplicou:** Cada constante é um bloco que declara `Set.of(...)` — qualquer desenvolvedor lê e entende o fluxo sem comentário.
-- **Por que melhora manutenção:** Em auditoria ou revisão de código, o revisor valida o fluxo inteiro em um único arquivo. Reduz documentação externa que desatualiza.
+**b) Self-documenting code com getSlaFormatado()**
+- **O que foi feito:** O método `getSlaFormatado()` retorna uma string legível: `"Alta — SLA: 5 dia(s) | Impacto: Risco à saúde..."`. A View usa esse método diretamente, sem formatação manual.
+- **Como aplicou:** A `CadastroSolicitacaoView.coletarPrioridade()` lista as prioridades chamando `getSlaFormatado()` — qualquer desenvolvedor entende o que será exibido sem ler a View.
+- **Por que melhora manutenção:** O enum auto-descreve suas regras de negócio. Em auditoria, basta ler `Prioridade.java` para validar todos os SLAs do sistema.
 
-**c) Imutabilidade via `Set.of()` (Defensive Return)**
-- **O que foi feito:** Os conjuntos retornados são `Set.of()` (imutáveis). Nenhum código externo pode adicionar transições indevidas.
-- **Como aplicou:** `Set.of(TRIAGEM, CANCELADO)` retorna uma coleção que lança exceção se alguém tentar modificá-la.
-- **Por que melhora manutenção:** Previne bugs sutis onde código externo poderia alterar as regras de transição em tempo de execução, garantindo integridade da máquina de estados.
+**c) Coesão: dados + comportamento juntos (Tell, Don't Ask)**
+- **O que foi feito:** `impactoSocial` e `exemploContexto` são campos do enum, não de uma classe auxiliar ou configuração externa. A prioridade **sabe** seu impacto.
+- **Como aplicou:** Em vez de a View perguntar "qual o impacto da prioridade X?" e montar a string, o enum responde com `getImpactoSocial()`.
+- **Por que melhora manutenção:** Adicionar uma nova prioridade (ex.: `URGENTE`) exige apenas adicionar uma constante com todos os dados. Nenhuma classe externa precisa ser modificada.
 
 ---
 
-## 2. Método `avancarStatus` — Classe `Solicitacao`
+## 2. Método `verificarDuplicidade` — Classe `SolicitacaoService`
 
-**Localização:** `src/com/observaacao/model/Solicitacao.java`
+**Localização:** `src/com/observaacao/service/SolicitacaoService.java`
 
 ### Práticas de Clean Code aplicadas:
 
-**a) Fail Fast com mensagem rica de contexto**
-- **O que foi feito:** O método valida a transição antes de alterar qualquer estado. Se inválida, lança `IllegalStateException` com mensagem que inclui: de onde veio, para onde tentou ir, e o que era permitido.
-- **Como aplicou:** `String.format("Transição inválida: %s → %s. Permitidos: %s", ...)` — a exceção é autoexplicativa.
-- **Por que melhora manutenção:** Quando um gestor tenta avançar para status errado, o erro no log/tela explica o problema completo. Zero necessidade de debug.
+**a) Método com responsabilidade única e nome descritivo**
+- **O que foi feito:** A detecção de possíveis duplicatas foi isolada em `verificarDuplicidade(categoria, bairro, descricao, solicitante)` — método privado que é chamado dentro de `cadastrar()` junto com as demais validações.
+- **Como aplicou:** Antes, o cadastro não verificava duplicatas. Agora, `cadastrar()` lê como uma narrativa: `validarCamposObrigatorios(...)`, `validarRegraAnonimato(...)`, `verificarLimiteCadastros(...)`, `verificarDuplicidade(...)`. Cada validação tem seu método.
+- **Por que melhora manutenção:** Se o critério de duplicata mudar (ex.: incluir localização no filtro), há um único método para alterar. Os demais métodos de validação não são afetados.
 
-**b) Responsabilidade Única (SRP) — transição + auditoria numa operação atômica**
-- **O que foi feito:** `avancarStatus()` faz duas coisas inseparáveis: valida+transiciona **e** registra no histórico. São logicamente uma operação, não duas.
-- **Como aplicou:** Chamada interna `registrarMovimentacao()` sempre acontece junto com a mudança de status. Impossível alterar status sem gerar histStatus.
-- **Por que melhora manutenção:** Elimina a classe de bug mais comum em sistemas de workflow: "o status mudou mas o histórico não foi atualizado". A auditoria é garantida por design.
+**b) Fail Fast com log de auditoria integrado**
+- **O que foi feito:** Quando uma possível duplicata é detectada, o método registra um `LogAuditoria` do tipo `TENTATIVA_ABUSO` **antes** de lançar a exceção. Isso garante rastreabilidade mesmo quando a operação é negada.
+- **Como aplicou:** `registrarLog(TipoEvento.TENTATIVA_ABUSO, null, ator, "Possível duplicata...", anonimo)` seguido de `throw new IllegalArgumentException(...)`. O gestor pode consultar as tentativas bloqueadas no painel de auditoria.
+- **Por que melhora manutenção:** Efeitos colaterais (log) e pré-condições (validação) são explícitos. Nenhum desenvolvedor precisará adivinhar onde as tentativas de abuso são registradas — está dentro do próprio método de verificação.
 
-**c) Campos `final` e `Collections.unmodifiableList` (Imutabilidade defensiva)**
-- **O que foi feito:** `protocolo`, `solicitante`, `dataCriacao`, e as listas internas são `final`. Os getters de lista retornam `Collections.unmodifiableList()`.
-- **Como aplicou:** Nenhum código externo pode alterar o protocolo ou injetar elementos na lista de histórico diretamente.
-- **Por que melhora manutenção:** Em projetos com múltiplos desenvolvedores, impede que alguém faça `solicitacao.getHistoricoStatus().add(...)` por fora, quebrando a integridade da auditoria.
+**c) Extração de `calcularSimilaridade()` como primitiva reutilizável (DRY)**
+- **O que foi feito:** A comparação entre descrições usa coeficiente de Jaccard por palavras, extraído em método privado `calcularSimilaridade(a, b)` que retorna `double` entre 0.0 e 1.0.
+- **Como aplicou:** `verificarDuplicidade()` chama `calcularSimilaridade(descExistente, descNova) > 0.8`. Se amanhã o método for necessário em outro contexto (ex.: sugerir solicitações similares ao cidadão), basta torná-lo `public`.
+- **Por que melhora manutenção:** O threshold (`0.8`) e o algoritmo estão isolados. Trocar por Levenshtein ou TF-IDF no futuro requer alterar apenas `calcularSimilaridade()`, sem tocar na lógica de duplicate detection.
 
 ---
 
-## 3. Classe `FilaAtendimento` — Fila com `PriorityQueue`
+## 3. Método `validarRegraAnonimato` — Classe `SolicitacaoService`
 
-**Localização:** `src/com/observaacao/model/FilaAtendimento.java`
+**Localização:** `src/com/observaacao/service/SolicitacaoService.java`
 
 ### Práticas de Clean Code aplicadas:
 
-**a) Composição de Comparator com API fluente**
-- **O que foi feito:** O comparador é declarado como constante estática com `Comparator.comparingInt(...).thenComparing(...)` — primeiro prioridade, depois data de criação (FIFO dentro da mesma prioridade).
-- **Como aplicou:** `COMPARADOR_FILA` é um `Comparator<Solicitacao>` reutilizado pela `PriorityQueue` e pelos métodos de listagem. Não há lógica de comparação duplicada.
-- **Por que melhora manutenção:** Se o critério de ordenação mudar (ex.: adicionar peso por categoria), há um único ponto de alteração. Todos os métodos recebem a mudança automaticamente.
+**a) Regra de negócio com constantes nomeadas (evitar Magic Numbers)**
+- **O que foi feito:** Os mínimos de caracteres para descrição são constantes de classe: `DESCRICAO_MINIMA_ANONIMO = 20` e `DESCRICAO_MINIMA_IDENTIFICADO = 10`. A diferença materializa a decisão técnica: anônimos precisam compensar a ausência de identificação com mais detalhes.
+- **Como aplicou:** `if (descricao.trim().length() < DESCRICAO_MINIMA_ANONIMO)` — o nome da constante explica **por quê** o mínimo é maior. Sem constante, seria um `20` mágico que ninguém saberia justificar.
+- **Por que melhora manutenção:** O gestor pode ajustar os mínimos em um único lugar. A constante nomeada serve como documentação inline — não precisa de comentário para explicar o `20`.
 
-**b) Nomes de método orientados ao domínio**
-- **O que foi feito:** Métodos como `listarAguardandoAtendimento()`, `listarEmExecucao()`, `proximaDaFila()`, `contarAguardando()` usam vocabulário do domínio público, não termos técnicos.
-- **Como aplicou:** Em vez de `getPending()` ou `filterByStatus()`, o código lê como o gestor pensa: "listar aguardando atendimento", "próxima da fila".
-- **Por que melhora manutenção:** Um gestor público ou analista de negócio consegue validar o código lendo os nomes dos métodos. Reduz traduções mentais e erros de interpretação.
+**b) Bifurcação clara por perfil de usuário (Guard Clause / Cláusula de guarda)**
+- **O que foi feito:** O método valida diferente dependendo de `solicitante.isAnonimo()`. Para anônimo: exige descrição detalhada. Para identificado: exige nome e e-mail.
+- **Como aplicou:** A cláusula `if (solicitante.isAnonimo())` vem primeiro (guard clause). Se anônimo, valida descrição e retorna. Se identificado, segue para validação de dados pessoais. Fluxo linear, sem `else` aninhado.
+- **Por que melhora manutenção:** Cada perfil tem seu bloco isolado. Adicionar uma regra para um novo perfil (ex.: servidor autenticado) é adicionar um `else if` sem mexer nos demais.
 
-**c) Extração de predicado privado `isAguardandoAtendimento` (DRY)**
-- **O que foi feito:** O filtro que define "solicitação aguardando" — `ABERTO || TRIAGEM` — foi extraído para um método privado reutilizado em `listarAguardandoAtendimento()`, `contarAguardando()` e `adicionar()`.
-- **Como aplicou:** Se o conceito de "aguardando" mudar (ex.: incluir um futuro status `EM_ESPERA`), altera-se **um único método**.
-- **Por que melhora manutenção:** Elimina duplicação de lógica condicional que, quando espalhada, inevitavelmente evolui de forma inconsistente em diferentes partes do código.
+**c) Mensagem de exceção com contexto (ajuda o cidadão)**
+- **O que foi feito:** Quando o anônimo não atinge o mínimo, a mensagem inclui o mínimo esperado **e** quantos caracteres foram informados: `"Solicitação anônima exige descrição mais detalhada (mínimo 20 caracteres). Você informou 12."`.
+- **Como aplicou:** `String.format("...mínimo %d caracteres. Você informou %d.", DESCRICAO_MINIMA_ANONIMO, descricao.trim().length())`.
+- **Por que melhora manutenção:** A mensagem é autoexplicativa. O atendente ou cidadão entende exatamente o que corrigir. Zero necessidade de consultar documentação externa ou debug.
 
 ---
 
@@ -78,22 +78,23 @@ As práticas aplicadas convergem em 3 pilares da manutenibilidade:
 
 | Pilar | Práticas aplicadas | Benefício |
 |-------|-------------------|-----------|
-| **Legibilidade** | Enum autodocumentado, nomes de domínio, comparator fluente | O fluxo do sistema é legível direto no código |
-| **Modificabilidade** | Máquina de estados no enum, predicado extraído, comparator centralizado | Novo status = 1 ponto de alteração |
-| **Confiabilidade** | Fail fast, imutabilidade, auditoria atômica | Impossível transição sem registro, impossível modificação externa |
+| **Legibilidade** | Enum com SLA autodescritivo, constantes nomeadas, mensagens ricas | O sistema é legível como especificação |
+| **Modificabilidade** | SLA no enum, similaridade extraída, guard clauses por perfil | Novo SLA ou regra = 1 ponto de alteração |
+| **Confiabilidade** | Fail fast com log, auditoria integrada, imutabilidade | Impossível abuso sem registro; impossível modificação externa |
 
 Essas práticas são essenciais em um sistema voltado ao cidadão (ODS 16), onde rastreabilidade e evolução contínua são requisitos, não luxos.
 
 ---
 
-## Adendo — Clean Code nas funcionalidades de acompanhamento
-
-As novas funcionalidades implementadas (acompanhamento pelo cidadão e painel do gestor) seguem as mesmas práticas:
+## Adendo — Clean Code nas demais funcionalidades
 
 | Método/Classe | Prática aplicada | Onde |
 |---------------|------------------|------|
-| `Solicitacao.isAtrasada()` | Encapsulamento de regra de negócio — a lógica de "atrasada" não depende de cálculo externo | `Solicitacao.java` |
-| `Solicitacao.getJustificativaAtraso()` | Tell, Don't Ask — a solicitação sabe buscar a justificativa no próprio histórico | `Solicitacao.java` |
-| `SolicitacaoService.avancarStatus()` | Fail Fast — valida observação obrigatória antes de qualquer transição | `SolicitacaoService.java` |
-| `FilaAtendimento.listarPorBairro()` | DRY + Streams — filtros reutilizam o `COMPARADOR_FILA` centralizado | `FilaAtendimento.java` |
-| `GestaoSolicitacaoView.avancarStatus()` | Loop de validação obrigatória — garante que o gestor nunca avança status sem justificativa | `GestaoSolicitacaoView.java` |
+| `Prioridade.getSlaFormatado()` | Self-documenting — exibe SLA sem lógica na View | `Prioridade.java` |
+| `Solicitacao.calcularPrazo()` | Eliminação de Magic Numbers — usa `prioridade.getPrazoEmDias()` | `Solicitacao.java` |
+| `SolicitacaoService.verificarLimiteCadastros()` | Rate limiting com log de auditoria — previne spam | `SolicitacaoService.java` |
+| `SolicitacaoService.cadastrar()` | Narrativa de validação — cada regra é um método com nome descritivo | `SolicitacaoService.java` |
+| `LogAuditoria` (classe) | Imutabilidade total (`final`) — registro de auditoria não pode ser alterado | `LogAuditoria.java` |
+| `StatusSolicitacao.podeTransicionarPara()` | Máquina de estados no enum — transições declarativas | `StatusSolicitacao.java` |
+| `FilaAtendimento.COMPARADOR_FILA` | Composição fluente de Comparator — critério centralizado | `FilaAtendimento.java` |
+| `GestaoSolicitacaoView.verLogAuditoria()` | Auditoria acessível — getor consulta tentativas de abuso | `GestaoSolicitacaoView.java` |

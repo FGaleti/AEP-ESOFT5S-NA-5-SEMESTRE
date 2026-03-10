@@ -77,15 +77,10 @@ public class Solicitacao {
         return Collections.unmodifiableList(comentarios);
     }
 
-    // --- Cálculo de prazo ---
+    // --- Cálculo de prazo (usa SLA definido no enum Prioridade) ---
 
     private LocalDateTime calcularPrazo(Prioridade prioridade) {
-        return switch (prioridade) {
-            case CRITICA -> dataCriacao.plusDays(2);
-            case ALTA    -> dataCriacao.plusDays(5);
-            case MEDIA   -> dataCriacao.plusDays(15);
-            case BAIXA   -> dataCriacao.plusDays(30);
-        };
+        return dataCriacao.plusDays(prioridade.getPrazoEmDias());
     }
 
     // --- Verificação de atraso ---
@@ -168,10 +163,11 @@ public class Solicitacao {
         sb.append(String.format("  Descrição:    %s%n", descricao));
         sb.append(String.format("  Bairro:       %s%n", bairro));
         sb.append(String.format("  Localização:  %s%n", localizacao));
-        sb.append(String.format("  Prioridade:   %s%n", prioridade.getDescricao()));
+        sb.append(String.format("  Prioridade:   %s (SLA: %d dias)%n", prioridade.getDescricao(), prioridade.getPrazoEmDias()));
+        sb.append(String.format("  Impacto:      %s%n", prioridade.getImpactoSocial()));
         sb.append(String.format("  Status:       %s%n", status.getDescricao()));
         sb.append(String.format("  Criado em:    %s%n", dataCriacao.format(FORMATTER)));
-        sb.append(String.format("  Prazo:        %s%n", prazoEstimado.format(FORMATTER)));
+        sb.append(String.format("  Prazo SLA:    %s%n", prazoEstimado.format(FORMATTER)));
         if (isAtrasada()) {
             sb.append(String.format("  ⚠ ATRASADA:   %d dia(s) de atraso%n", getDiasAtraso()));
             sb.append(String.format("  Justificativa: %s%n", getJustificativaAtraso()));
