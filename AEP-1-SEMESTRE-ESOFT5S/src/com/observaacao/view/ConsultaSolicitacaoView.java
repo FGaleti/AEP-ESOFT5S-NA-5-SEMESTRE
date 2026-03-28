@@ -26,11 +26,11 @@ public class ConsultaSolicitacaoView {
         boolean continuar = true;
         while (continuar) {
             System.out.println("\n╔══════════════════════════════════════════════════╗");
-            System.out.println("║       ACOMPANHAMENTO PELO CIDADÃO               ║");
+            System.out.println("║       ACOMPANHAMENTO PELO CIDADÃO                ║");
             System.out.println("╠══════════════════════════════════════════════════╣");
-            System.out.println("║  [1] Buscar por protocolo (visão completa)      ║");
-            System.out.println("║  [2] Ver prazos e justificativas de atraso      ║");
-            System.out.println("║  [0] Voltar ao menu principal                   ║");
+            System.out.println("║  [1] Buscar por protocolo (visão completa)       ║");
+            System.out.println("║  [2] Ver prazos e justificativas de atraso       ║");
+            System.out.println("║  [0] Voltar ao menu principal                    ║");
             System.out.println("╚══════════════════════════════════════════════════╝");
             System.out.print("Opção: ");
             String opcao = scanner.nextLine().trim();
@@ -48,7 +48,7 @@ public class ConsultaSolicitacaoView {
 
     public void exibirConsultaCompleta() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║      CONSULTAR SOLICITAÇÃO POR PROTOCOLO        ║");
+        System.out.println("║      CONSULTAR SOLICITAÇÃO POR PROTOCOLO         ║");
         System.out.println("╚══════════════════════════════════════════════════╝\n");
 
         System.out.print("Digite o número do protocolo: ");
@@ -71,7 +71,7 @@ public class ConsultaSolicitacaoView {
 
     public void exibirConsultaPrazo() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║        CONSULTA DE PRAZOS E JUSTIFICATIVAS      ║");
+        System.out.println("║        CONSULTA DE PRAZOS E JUSTIFICATIVAS       ║");
         System.out.println("╚══════════════════════════════════════════════════╝\n");
 
         System.out.print("Digite o número do protocolo: ");
@@ -109,7 +109,7 @@ public class ConsultaSolicitacaoView {
 
     public void exibirListagem() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║           LISTAGEM DE SOLICITAÇÕES              ║");
+        System.out.println("║           LISTAGEM DE SOLICITAÇÕES               ║");
         System.out.println("╚══════════════════════════════════════════════════╝\n");
 
         List<Solicitacao> todas = service.listarTodas();
@@ -149,7 +149,7 @@ public class ConsultaSolicitacaoView {
 
         if (solicitacao.isAtrasada()) {
             System.out.println("  ╔════════════════════════════════════════════════════╗");
-            System.out.println("  ║  ⚠  ATENÇÃO: SOLICITAÇÃO COM PRAZO VENCIDO        ║");
+            System.out.println("  ║  ⚠  ATENÇÃO: SOLICITAÇÃO COM PRAZO VENCIDO         ║");
             System.out.println("  ╚════════════════════════════════════════════════════╝");
             System.out.printf("  Prazo vencido há: %d dia(s)%n", solicitacao.getDiasAtraso());
             System.out.printf("  Data limite era:  %s%n", solicitacao.getPrazoEstimado().format(FORMATTER));
