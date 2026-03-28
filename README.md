@@ -212,11 +212,11 @@ Veja os arquivos de documentação no diretório `docs/`:
 ## 🤝 Contribuidores
 
 | Nome | RA |
-|------|----|
-Breno Bertaglia Nosima 24113673-2
-Felipe Galeti Gôngora 24036480-2
-Gustavo Mazeto Pasquini 24183078-2
-Henrique kendi Ikeda 24039456-2
+|------|-----|
+| Breno Bertaglia Nosima | 24113673-2 |
+| Felipe Galeti Gôngora | 24036480-2 |
+| Gustavo Mazeto Pasquini | 24183078-2 |
+| Henrique kendi Ikeda | 24039456-2 |
 
 
 
