@@ -29,25 +29,25 @@ public class GestaoSolicitacaoView {
         while (continuar) {
             exibirResumo();
             System.out.println("╔══════════════════════════════════════════════════════════╗");
-            System.out.println("║             PAINEL DO SERVIDOR / GESTOR                 ║");
+            System.out.println("║              PAINEL DO SERVIDOR / GESTOR                 ║");
             System.out.println("╠══════════════════════════════════════════════════════════╣");
-            System.out.println("║  Fluxo: Aberto → Triagem → Em Execução → Resolvido     ║");
-            System.out.println("║                                          → Encerrado    ║");
+            System.out.println("║  Fluxo: Aberto → Triagem → Em Execução → Resolvido       ║");
+            System.out.println("║         → Encerrado                                      ║");
             System.out.println("╠══════════════════════════════════════════════════════════╣");
-            System.out.println("║  [1] Avançar status (comentário obrigatório)            ║");
-            System.out.println("║  [2] Registrar comentário em solicitação                ║");
-            System.out.println("║  [3] Fila de atendimento (aguardando)                   ║");
-            System.out.println("║  [4] Solicitações em execução                           ║");
-            System.out.println("║  [5] Próxima da fila (maior prioridade)                 ║");
+            System.out.println("║  [1] Avançar status (comentário obrigatório)             ║");
+            System.out.println("║  [2] Registrar comentário em solicitação                 ║");
+            System.out.println("║  [3] Fila de atendimento (aguardando)                    ║");
+            System.out.println("║  [4] Solicitações em execução                            ║");
+            System.out.println("║  [5] Próxima da fila (maior prioridade)                  ║");
             System.out.println("║  ──── Filtros ─────────────────────────────────────────  ║");
-            System.out.println("║  [6] Listar por PRIORIDADE                              ║");
-            System.out.println("║  [7] Listar por BAIRRO                                  ║");
-            System.out.println("║  [8] Listar por CATEGORIA                               ║");
-            System.out.println("║  [9] Listar ATRASADAS                                   ║");
-            System.out.println("║  ──── Auditoria / Prevenção de Abuso ─────────────────── ║");
-            System.out.println("║  [10] Ver LOG DE AUDITORIA                              ║");
-            System.out.println("║  [11] Ver TABELA DE SLA (prazos por prioridade)         ║");
-            System.out.println("║  [0] Voltar ao menu principal                           ║");
+            System.out.println("║  [6] Listar por PRIORIDADE                               ║");
+            System.out.println("║  [7] Listar por BAIRRO                                   ║");
+            System.out.println("║  [8] Listar por CATEGORIA                                ║");
+            System.out.println("║  [9] Listar ATRASADAS                                    ║");
+            System.out.println("║  ──── Auditoria / Prevenção de Abuso ──────────────────  ║");
+            System.out.println("║  [10] Ver LOG DE AUDITORIA                               ║");
+            System.out.println("║  [11] Ver TABELA DE SLA (prazos por prioridade)          ║");
+            System.out.println("║  [0] Voltar ao menu principal                            ║");
             System.out.println("╚══════════════════════════════════════════════════════════╝");
             System.out.print("Opção: ");
 
@@ -362,7 +362,7 @@ public class GestaoSolicitacaoView {
 
     private void verTabelaSLA() {
         System.out.println("\n╔═════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║   TABELA DE SLA — Acordo de Nível de Serviço (ODS 16)              ║");
+        System.out.println("║   TABELA DE SLA — Acordo de Nível de Serviço (ODS 16)                   ║");
         System.out.println("╠═════════════════════════════════════════════════════════════════════════╣");
         System.out.printf("  %-10s %-8s %-50s%n", "PRIORIDADE", "PRAZO", "IMPACTO SOCIAL");
         System.out.println("  " + "─".repeat(70));

@@ -211,24 +211,14 @@ Veja os arquivos de documentação no diretório `docs/`:
 
 ## 🤝 Contribuidores
 
-| Nome | RA |
-|------|-----|
-| Breno Bertaglia Nosima | 24113673-2 |
-| Felipe Galeti Gôngora | 24036480-2 |
+| Nome                    | RA |
+|-------------------------|-----|
+| Breno Bertaglia Nosima  | 24113673-2 |
+| Felipe Galeti Gôngora   | 24036480-2 |
 | Gustavo Mazeto Pasquini | 24183078-2 |
-| Henrique kendi Ikeda | 24039456-2 |
+| Henrique Kendi Ikeda    | 24039456-2 |
 
 
-
----
-
-## 📞 Suporte
-
-Dúvidas ou sugestões?
-
-- 📧 **Email:** aep.observacao@example.com
-- 💬 **Issues:** [Abrir uma issue](https://github.com/seu-usuario/AEP-ESOFT5S-NA-5-SEMESTRE/issues)
-- 📖 **Wiki:** [Documentação completa](https://github.com/seu-usuario/AEP-ESOFT5S-NA-5-SEMESTRE/wiki)
 
 ---
 
@@ -240,9 +230,9 @@ Dúvidas ou sugestões?
 - [x] Interface CLI
 - [x] Log de auditoria
 - [ ] Integração com banco de dados (fase 2)
-- [ ] API REST + Swagger (fase 3)
-- [ ] Frontend web responsivo (fase 3)
-- [ ] Mobile app (fase 4)
+- [ ] Conversão para o Spring Boot (fase 2)
+- [ ] API RESTFull (fase 2)
+- [ ] Frontend web responsivo (fase 2)
 
 ---
 
@@ -280,8 +270,6 @@ ObservaAção contribui diretamente para:
 ---
 
 <div align="center">
-
-**Desenvolvido com ❤️ para um governo mais aberto e participativo.**
 
 [⬆ Voltar ao topo](#observaação---sistema-de-ouvidoria-digital-pública)
 

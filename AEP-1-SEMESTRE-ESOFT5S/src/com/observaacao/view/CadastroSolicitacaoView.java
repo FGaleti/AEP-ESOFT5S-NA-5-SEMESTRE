@@ -16,7 +16,7 @@ public class CadastroSolicitacaoView {
 
     public void exibirFormulario() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║         CADASTRO DE NOVA SOLICITAÇÃO            ║");
+        System.out.println("║         CADASTRO DE NOVA SOLICITAÇÃO             ║");
         System.out.println("╚══════════════════════════════════════════════════╝\n");
 
         // 1. Identificação ou Anônimo
@@ -56,7 +56,7 @@ public class CadastroSolicitacaoView {
 
             if (solicitante.isAnonimo()) {
                 System.out.println("\n╔══════════════════════════════════════════════════╗");
-                System.out.println("║  ⚠ IMPORTANTE — SOLICITAÇÃO ANÔNIMA             ║");
+                System.out.println("║  ⚠ IMPORTANTE — SOLICITAÇÃO ANÔNIMA              ║");
                 System.out.println("║  Anote seu protocolo! Este é o ÚNICO meio de     ║");
                 System.out.println("║  acompanhar o andamento da sua solicitação.      ║");
                 System.out.println("║  Seus dados pessoais NÃO foram registrados.      ║");
@@ -78,11 +78,11 @@ public class CadastroSolicitacaoView {
         if (opcao == 2) {
             System.out.println();
             System.out.println("  ╔══════════════════════════════════════════════════╗");
-            System.out.println("  ║  MODO ANÔNIMO ATIVADO                           ║");
+            System.out.println("  ║  MODO ANÔNIMO ATIVADO                            ║");
             System.out.println("  ║  → Nenhum dado pessoal será coletado ou salvo.   ║");
             System.out.println("  ║  → Sua identidade NÃO poderá ser descoberta.     ║");
             System.out.println("  ║  → A descrição precisará ser mais detalhada      ║");
-            System.out.println("  ║    (mínimo 20 caracteres) para viabilizar         ║");
+            System.out.println("  ║    (mínimo 20 caracteres) para viabilizar        ║");
             System.out.println("  ║    o atendimento sem contato.                    ║");
             System.out.println("  ╚══════════════════════════════════════════════════╝");
             System.out.println();
