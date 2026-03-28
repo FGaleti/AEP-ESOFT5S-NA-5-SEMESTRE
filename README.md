@@ -146,9 +146,9 @@ Ao iniciar, você verá:
 ╠══════════════════════════════════════════════════╣
 ║  [1] Nova Solicitação                            ║
 ║  [2] Acompanhar Solicitação                      ║
-║  [3] Listar Todas as Solicitações               ║
+║  [3] Listar Todas as Solicitações                ║
 ║  [4] Menu de Gestão (Gestor)                     ║
-║  [0] Sair                                         ║
+║  [0] Sair                                        ║
 ╚══════════════════════════════════════════════════╝
 ```
 
