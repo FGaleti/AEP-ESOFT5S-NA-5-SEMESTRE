@@ -24,7 +24,10 @@ public class SolicitacaoResponseDTO {
     private String bairro;
     private String localizacao;
     private Prioridade prioridade;
+    private String prioridadeLabel;
+    private int slaDias;
     private StatusSolicitacao status;
+    private String statusLabel;
     private String statusFormatado;
     private String solicitante;
     private boolean anonimo;
@@ -33,6 +36,8 @@ public class SolicitacaoResponseDTO {
     private long diasRestantes;
     private long diasAtraso;
     private boolean atrasada;
-    private List<String> historico;
-    private List<String> comentarios;
+    /** Próximos status válidos a partir do status atual (máquina de estados). */
+    private List<StatusSolicitacao> transicoesPermitidas;
+    private List<HistoricoItemDTO> historico;
+    private List<ComentarioDTO> comentarios;
 }

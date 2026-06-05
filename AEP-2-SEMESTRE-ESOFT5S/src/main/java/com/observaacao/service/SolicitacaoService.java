@@ -283,7 +283,9 @@ public class SolicitacaoService {
 
     private Usuario recuperarOuCriarUsuario(CadastrarSolicitacaoDTO dto) {
         if (dto.isAnonimo()) {
-            return Usuario.criarAnonimo();
+            // Persiste o usuário anônimo: a Solicitação possui um @ManyToOne
+            // obrigatório para o solicitante, então ele não pode ser transiente.
+            return usuarioRepository.save(Usuario.criarAnonimo());
         }
 
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmailUsuario())

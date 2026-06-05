@@ -153,10 +153,13 @@ public class SolicitacaoController {
                 .bairro(solicitacao.getBairro())
                 .localizacao(solicitacao.getLocalizacao())
                 .prioridade(solicitacao.getPrioridade())
+                .prioridadeLabel(solicitacao.getPrioridade().getDescricao())
+                .slaDias(solicitacao.getPrioridade().getPrazoEmDias())
                 .status(solicitacao.getStatus())
+                .statusLabel(solicitacao.getStatus().getDescricao())
                 .statusFormatado(solicitacao.getStatusFormatado())
-                .solicitante(solicitacao.getSolicitante().isAnonimo() 
-                        ? "Anônimo" 
+                .solicitante(solicitacao.getSolicitante().isAnonimo()
+                        ? "Anônimo"
                         : solicitacao.getSolicitante().getNome())
                 .anonimo(solicitacao.getSolicitante().isAnonimo())
                 .dataCriacao(solicitacao.getDataCriacao())
@@ -164,18 +167,27 @@ public class SolicitacaoController {
                 .diasRestantes(solicitacao.getDiasRestantes())
                 .diasAtraso(solicitacao.getDiasAtraso())
                 .atrasada(solicitacao.isAtrasada())
+                .transicoesPermitidas(new java.util.ArrayList<>(
+                        solicitacao.getStatus().proximosPermitidos()))
                 .historico(solicitacao.getHistoricoStatus().stream()
-                        .map(h -> String.format("%s → %s (%s) - %s",
-                                h.getStatusAnterior() == null ? "INÍCIO" : h.getStatusAnterior(),
-                                h.getStatusNovo(),
-                                h.getResponsavel(),
-                                h.getObservacao()))
+                        .map(h -> HistoricoItemDTO.builder()
+                                .statusAnterior(h.getStatusAnterior())
+                                .statusAnteriorLabel(h.getStatusAnterior() == null
+                                        ? "Criação"
+                                        : h.getStatusAnterior().getDescricao())
+                                .statusNovo(h.getStatusNovo())
+                                .statusNovoLabel(h.getStatusNovo().getDescricao())
+                                .responsavel(h.getResponsavel())
+                                .observacao(h.getObservacao())
+                                .dataMovimentacao(h.getDataMovimentacao())
+                                .build())
                         .collect(Collectors.toList()))
                 .comentarios(solicitacao.getComentarios().stream()
-                        .map(c -> String.format("[%s] %s - %s",
-                                c.getAutor(),
-                                c.getTexto(),
-                                c.getDataCriacao()))
+                        .map(c -> ComentarioDTO.builder()
+                                .autor(c.getAutor())
+                                .texto(c.getTexto())
+                                .dataCriacao(c.getDataCriacao())
+                                .build())
                         .collect(Collectors.toList()))
                 .build();
     }
