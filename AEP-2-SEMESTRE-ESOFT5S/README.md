@@ -53,7 +53,8 @@ com/observaacao/
 │
 ├── controller/
 │   ├── SolicitacaoController.java      # Endpoints de Solicitações
-│   └── CategoriaController.java         # Endpoints de Categorias
+│   ├── CategoriaController.java         # Endpoints de Categorias
+│   └── UsuarioController.java           # Total/lista de usuários (área admin)
 │
 ├── service/
 │   ├── SolicitacaoService.java          # Lógica de negócio
@@ -80,7 +81,9 @@ com/observaacao/
 │   ├── CadastrarSolicitacaoDTO.java     # Requisição de cadastro
 │   ├── AtualizarStatusDTO.java          # Requisição de atualização
 │   ├── AdicionarComentarioDTO.java      # Requisição de comentário
-│   ├── SolicitacaoResponseDTO.java      # Resposta formatada
+│   ├── SolicitacaoResponseDTO.java      # Resposta (com transições permitidas)
+│   ├── HistoricoItemDTO.java            # Item do histórico (estruturado)
+│   ├── ComentarioDTO.java               # Comentário (estruturado)
 │   └── ErrorResponseDTO.java            # Resposta de erro
 │
 ├── config/
@@ -130,8 +133,19 @@ com/observaacao/
    ```
 
 4. **Acessar a aplicação**
-   - API: [http://localhost:8080/observacao](http://localhost:8080/observacao)
-   - H2 Console: [http://localhost:8080/observacao/h2-console](http://localhost:8080/observacao/h2-console)
+   - API: [http://localhost:8080/api/categorias](http://localhost:8080/api/categorias)
+   - H2 Console: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+     (JDBC URL: `jdbc:h2:mem:observacao_db`, usuário `sa`, sem senha)
+
+> 💡 **Sem Maven no PATH?** Use o Maven que acompanha o IntelliJ IDEA:
+> `"C:\Program Files\JetBrains\IntelliJ IDEA <versão>\plugins\maven\lib\maven3\bin\mvn" spring-boot:run`
+
+### 🔗 Integração com o front-end
+
+Este back-end serve a API consumida pelo front-end React em
+[`../observacao-frontend`](../observacao-frontend). Os controllers expõem
+`@CrossOrigin(origins = "*")` e a API fica em `/api` (sem context-path), de modo
+que o proxy do Vite (`/api` → `localhost:8080`) funciona sem ajustes de CORS.
 
 ---
 
@@ -141,7 +155,7 @@ com/observaacao/
 
 #### 1. **Cadastrar nova solicitação**
 ```http
-POST /observacao/api/solicitacoes
+POST /api/solicitacoes
 Content-Type: application/json
 
 {
@@ -170,19 +184,19 @@ Content-Type: application/json
 
 #### 2. **Consultar solicitação por protocolo**
 ```http
-GET /observacao/api/solicitacoes/{protocolo}
+GET /api/solicitacoes/{protocolo}
 ```
 
 #### 3. **Listar solicitações com filtros**
 ```http
-GET /observacao/api/solicitacoes?status=ABERTO
-GET /observacao/api/solicitacoes?prioridade=ALTA
-GET /observacao/api/solicitacoes?bairro=Centro
+GET /api/solicitacoes?status=ABERTO
+GET /api/solicitacoes?prioridade=ALTA
+GET /api/solicitacoes?bairro=Centro
 ```
 
 #### 4. **Atualizar status**
 ```http
-PATCH /observacao/api/solicitacoes/{protocolo}/status
+PATCH /api/solicitacoes/{protocolo}/status
 Content-Type: application/json
 
 {
@@ -194,7 +208,7 @@ Content-Type: application/json
 
 #### 5. **Adicionar comentário**
 ```http
-POST /observacao/api/solicitacoes/{protocolo}/comentarios
+POST /api/solicitacoes/{protocolo}/comentarios
 Content-Type: application/json
 
 {
@@ -207,17 +221,17 @@ Content-Type: application/json
 
 #### 1. **Listar categorias**
 ```http
-GET /observacao/api/categorias
+GET /api/categorias
 ```
 
 #### 2. **Obter categoria por ID**
 ```http
-GET /observacao/api/categorias/{id}
+GET /api/categorias/{id}
 ```
 
 #### 3. **Criar categoria**
 ```http
-POST /observacao/api/categorias
+POST /api/categorias
 Content-Type: application/json
 
 {
@@ -226,6 +240,19 @@ Content-Type: application/json
 }
 ```
 
+### Usuários (área administrativa)
+
+#### 1. **Listar usuários**
+```http
+GET /api/usuarios
+```
+
+#### 2. **Total de usuários**
+```http
+GET /api/usuarios/count
+```
+**Resposta:** `{ "total": 3 }`
+
 ---
 
 ## ⚙️ Configuração
@@ -233,9 +260,8 @@ Content-Type: application/json
 ### application.properties
 
 ```properties
-# Porta
+# Porta (API servida diretamente em /api, sem context-path)
 server.port=8080
-server.servlet.context-path=/observacao
 
 # Banco de Dados (H2 em Memória)
 spring.datasource.url=jdbc:h2:mem:observacao_db
@@ -244,6 +270,9 @@ spring.jpa.hibernate.ddl-auto=create-drop
 # Logging
 logging.level.com.observaacao=DEBUG
 ```
+
+> ℹ️ O H2 é **em memória** com `ddl-auto=create-drop`: os dados são recriados a
+> cada reinício e as categorias são re-semeadas pelo `DataLoader`.
 
 ---
 
@@ -321,7 +350,7 @@ Response: SolicitacaoResponseDTO (200 OK)
 ### cURL - Cadastrar
 
 ```bash
-curl -X POST http://localhost:8080/observacao/api/solicitacoes \
+curl -X POST http://localhost:8080/api/solicitacoes \
   -H "Content-Type: application/json" \
   -d '{
     "categoriaId": 1,
@@ -339,13 +368,13 @@ curl -X POST http://localhost:8080/observacao/api/solicitacoes \
 ### cURL - Consultar
 
 ```bash
-curl -X GET http://localhost:8080/observacao/api/solicitacoes/PROT-20260603140523-1001
+curl -X GET http://localhost:8080/api/solicitacoes/PROT-20260603140523-1001
 ```
 
 ### cURL - Listar por Status
 
 ```bash
-curl -X GET "http://localhost:8080/observacao/api/solicitacoes?status=ABERTO"
+curl -X GET "http://localhost:8080/api/solicitacoes?status=ABERTO"
 ```
 
 ---

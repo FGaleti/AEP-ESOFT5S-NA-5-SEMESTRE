@@ -3,8 +3,10 @@
 <div align="center">
 
 ![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue?style=for-the-badge)
 
 **Uma plataforma inclusiva de ouvidoria digital para democratizar o acesso à transparência e participação cidadã nos processos públicos.**
 
@@ -42,7 +44,9 @@ O sistema democratiza o acesso ao poder público, permitindo que cidadãos de to
 - ✅ **Log de Auditoria** — Rastreabilidade completa de operações (CRUD + tentativas de abuso)
 - ✅ **Suporte a Anonimato** — Proteção de denunciantes conforme ODS 16.10
 - ✅ **Limite de Cadastros** — Prevenção de spam com verificação de duplicatas
-- ✅ **Interface CLI Acessível** — Menus responsivos e linguagem clara
+- ✅ **Interface CLI Acessível** (Fase 1) — Menus responsivos e linguagem clara
+- ✅ **Interface Web Responsiva** (Fase 2) — React mobile-first, com áreas
+  separadas para o **Cidadão** e o **Administrador**, consumindo a API REST
 
 ### Entidades Principais
 - **Solicitação** — NCT (número de identificação), categoria, descrição, status
@@ -55,6 +59,26 @@ O sistema democratiza o acesso ao poder público, permitindo que cidadãos de to
 ---
 
 ## 🏗️ Arquitetura
+
+### Estrutura do Repositório (Monorepo)
+
+O projeto evoluiu de uma aplicação CLI para uma solução **web full-stack**. O
+repositório reúne três módulos:
+
+```
+AEP-ESOFT5S-NA-5-SEMESTRE/
+├── AEP-1-SEMESTRE-ESOFT5S/   # Fase 1 — aplicação CLI em Java puro (referência)
+├── AEP-2-SEMESTRE-ESOFT5S/   # Fase 2 — back-end REST (Spring Boot + H2)
+└── observacao-frontend/      # Fase 2 — front-end web (React + Vite + TypeScript)
+```
+
+- **Back-end** expõe a API em `http://localhost:8080/api` e persiste no H2.
+- **Front-end** (porta 5173) consome a API e se divide em duas áreas:
+  **Cidadão** (`/`, criar e buscar solicitações) e **Administrativo**
+  (`/admin`, painel, listagem, dashboard, relatório e atualização de status).
+- Cada módulo tem o seu próprio `README.md` com detalhes e instruções.
+
+### Camada CLI (Fase 1)
 
 ```
 com/observaacao/
@@ -92,47 +116,66 @@ com/observaacao/
 
 ## 📋 Pré-requisitos
 
-Before you begin, ensure you have the following installed:
+Antes de começar, garanta que você tem instalado:
 
-- **Java 17+**
-- **Maven 3.8+** (opcional, para build)
+- **Java 17+** (back-end e CLI)
+- **Maven 3.8+** — ou use o Maven que acompanha o IntelliJ IDEA
+- **Node.js 18+** e **npm** (front-end React)
 - **Git**
-- **IDE recomendada:** IntelliJ IDEA Community / VS Code + Extension Pack for Java
+- **IDE recomendada:** IntelliJ IDEA + VS Code
 
-### Verificar versão Java
+### Verificar versões
 ```bash
 java -version
+node -v
 ```
 
 ---
 
 ## 🚀 Instalação
 
-### 1. Clonar o Repositório
+### Clonar o Repositório
 ```bash
-git clone https://github.com/seu-usuario/AEP-ESOFT5S-NA-5-SEMESTRE.git
-cd AEP-ESOFT5S-NA-5-SEMESTRE/AEP-1-SEMESTRE-ESOFT5S
+git clone https://github.com/FGaleti/AEP-ESOFT5S-NA-5-SEMESTRE.git
+cd AEP-ESOFT5S-NA-5-SEMESTRE
 ```
 
-### 2. Compilar o Projeto
+### ▶️ Aplicação Web (Fase 2 — recomendada)
+
+Use **dois terminais**: um para o back-end e outro para o front-end.
+
+**1. Back-end (porta 8080)**
 ```bash
-# Com Maven
+cd AEP-2-SEMESTRE-ESOFT5S
+mvn spring-boot:run
+```
+API em `http://localhost:8080/api` · Console H2 em `http://localhost:8080/h2-console`.
+
+> Sem Maven no PATH? Use o do IntelliJ:
+> `"C:\Program Files\JetBrains\IntelliJ IDEA <versão>\plugins\maven\lib\maven3\bin\mvn" spring-boot:run`
+
+**2. Front-end (porta 5173)**
+```bash
+cd observacao-frontend
+npm install      # apenas na primeira vez
+npm run dev
+```
+Acesse `http://localhost:5173` (cidadão) ou `http://localhost:5173/admin` (administrativo).
+
+### 💻 Aplicação CLI (Fase 1 — referência)
+```bash
+cd AEP-1-SEMESTRE-ESOFT5S
 mvn clean compile
-
-# Ou manualmente com o IDE (Build Project)
-```
-
-### 3. Executar
-```bash
-# Via Maven
 mvn exec:java -Dexec.mainClass="com.observaacao.Main"
-
-# Ou execute direto via IDE: Right-click Main.java > Run
+# Ou execute direto pela IDE: botão direito em Main.java > Run
 ```
 
 ---
 
 ## 📖 Como Usar
+
+> Esta seção descreve a **aplicação CLI (Fase 1)**. Para a aplicação web, veja os
+> fluxos e telas em [observacao-frontend/README.md](observacao-frontend/README.md).
 
 ### Menu Principal
 
@@ -201,10 +244,15 @@ Ao iniciar, você verá:
 
 ## 📚 Documentação Adicional
 
-Veja os arquivos de documentação no diretório `docs/`:
+Cada módulo possui o seu próprio README com detalhes técnicos:
 
-- [IHC_Personas.md](docs/IHC_Personas.md) — Personas, casos de uso e acessibilidade
-- [Manutencao_CleanCode.md](docs/Manutencao_CleanCode.md) — Análise de Clean Code aplicado
+- [AEP-2-SEMESTRE-ESOFT5S/README.md](AEP-2-SEMESTRE-ESOFT5S/README.md) — Back-end Spring Boot e endpoints da API
+- [observacao-frontend/README.md](observacao-frontend/README.md) — Front-end React (telas e execução)
+
+Documentação da Fase 1 (CLI):
+
+- [IHC_Personas.md](AEP-1-SEMESTRE-ESOFT5S/docs/IHC_Personas.md) — Personas, casos de uso e acessibilidade
+- [Manutencao_CleanCode.md](AEP-1-SEMESTRE-ESOFT5S/docs/Manutencao_CleanCode.md) — Análise de Clean Code aplicado
 - [LICENSE](LICENSE) — Licença MIT
 
 ---
@@ -224,15 +272,21 @@ Veja os arquivos de documentação no diretório `docs/`:
 
 ## 📊 Status do Projeto
 
+**Fase 1 — Aplicação CLI (Java puro)**
 - [x] Modelagem de entidades
 - [x] Camada de repository
 - [x] Lógica de negócio (service)
 - [x] Interface CLI
 - [x] Log de auditoria
-- [ ] Integração com banco de dados (fase 2)
-- [ ] Conversão para o Spring Boot (fase 2)
-- [ ] API RESTFull (fase 2)
-- [ ] Frontend web responsivo (fase 2)
+
+**Fase 2 — Web full-stack**
+- [x] Conversão para Spring Boot
+- [x] Integração com banco de dados (H2 + JPA/Hibernate)
+- [x] API RESTful
+- [x] Front-end web responsivo (React + Vite + TypeScript)
+- [x] Áreas separadas: Cidadão (`/`) e Administrativo (`/admin`)
+- [ ] Autenticação/login para proteger a área administrativa (próxima fase)
+- [ ] Persistência em banco real (PostgreSQL)
 
 ---
 
